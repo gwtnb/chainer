@@ -8,6 +8,13 @@ import chainer.links as L
 from chainer import training
 from chainer.training import extensions
 
+from dummy_link import DummyLink
+
+
+def some_fancy_factory(shape):
+    return DummyLink(F.relu)
+    # return L.PReLU(shape)
+
 
 # Network definition
 class MLP(chainer.Chain):
@@ -18,11 +25,13 @@ class MLP(chainer.Chain):
             l1=L.Linear(None, n_units),  # n_in -> n_units
             l2=L.Linear(None, n_units),  # n_units -> n_units
             l3=L.Linear(None, n_out),  # n_units -> n_out
+            r1=some_fancy_factory(n_units),
+            r2=some_fancy_factory(n_units),
         )
 
     def __call__(self, x):
-        h1 = F.relu(self.l1(x))
-        h2 = F.relu(self.l2(h1))
+        h1 = self.r1(self.l1(x))
+        h2 = self.r2(self.l2(h1))
         return self.l3(h2)
 
 
